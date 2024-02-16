@@ -27,19 +27,21 @@ module.exports = function (app) {
             if(locale == "american-to-british") {
                 console.log("attempting to translate to british.......")
                 translation = translator.toBritish(text);
+                console.log("returned with..... ", translation)
 
             } else if(locale == "british-to-american") {
                 console.log("attempting to translate to american.....")
                 translation = translator.toAmerican(text);
+                console.log("returned with..... ", translation)
 
             } else {
                 res.json({error: "Invalid value for locale field"});
                 return;
             }
 
-            if(!translation || translation[0] == text) {
+            if(translation[1] == null || translation[0] == text || !translation) {
                 console.log("translator didn't make any changes..............");
-                res.json({text, translation: "Everything looks good to me"});
+                res.json({text, translation: "Everything looks good to me!"});
 
             } else {
                 console.log("translator did do something, or atleast it thinks it did.......");

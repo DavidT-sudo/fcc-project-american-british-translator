@@ -28,7 +28,7 @@ class Translator {
         let translatedHtml = this.translate(inputText, translateObj, titles, timeRegex, "toBritish");
 
         if(translatedHtml == null) {
-            return inputText;
+            return [inputText, null];
         }
 
         return translatedHtml;
@@ -48,7 +48,7 @@ class Translator {
         let translatedHtml = this.translate(inputText, translateObj, titles, timeRegex, "toAmerican");
 
         if(translatedHtml == null) {
-            return inputText;
+            return [inputText, null];
         }
 
         return translatedHtml;
@@ -61,7 +61,7 @@ class Translator {
         let matches = {};
 
         Object.entries(titles).map(([key, value]) => {
-            if (lowerCaseText.includes(key)) {
+            if (lowerCaseText.includes(key + " ")) {
                 console.log("Hit on word ..... ", key);
                 matches[key] = value.charAt(0).toUpperCase() + value.slice(1,);
             }
@@ -69,14 +69,33 @@ class Translator {
 
         Object.entries(translateObj).map(([key, value]) => {
             if(lowerCaseText.includes(key)) {
-                console.log("Hit on word ..... ", key);
-                matches[key] = value;
+                // make sure some words don't just replace semi-words or if their letters match
+                console.log("should hit something....")
+                if(!key.includes(" ")) {
+                    let oneWordRegex = new RegExp(`\\b${key}\\b`, "gi");
+                    console.log("oneWordRegex ....." , oneWordRegex);
+                    console.log("key is ....", key);
+
+                    if(oneWordRegex.test(inputText)) {
+                        console.log("one-word Hit on word ..... ", key);
+                        return matches[key] = value;
+                        
+                    } else {
+                        console.log("sorry.... was just inner letters of a word");
+                        return;
+                    }
+
+                } else {
+
+                    console.log("multi-word Hit on phrase ..... ", key);
+                    return matches[key] = value;
+                }
+
+                
             }
         });
 
         let timeMatches = lowerCaseText.match(timeRegex);
-
-        console.log("timeMatches .... ", timeMatches);
 
         if(timeMatches) {
 
@@ -93,8 +112,10 @@ class Translator {
                 })
             }
 
-            console.log(matches);
         }
+
+        console.log("text ....", inputText);
+        console.log("matches", matches);
 
 
         let regex = new RegExp(Object.keys(matches).join("|"), "ig");
@@ -108,6 +129,7 @@ class Translator {
         });
 
         if(Object.keys(matches).length == 0) {
+            console.log("nothing matched........");
             return null;
         }
 
